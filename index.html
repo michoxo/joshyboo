@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Quest for Joshyboo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root { --space-black: #050508; --galaxy-purple: #200a38; --neon-cyan: #5de0e0; --glow-blue: rgba(93, 224, 224, 0.5); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Press+Start+2P', cursive; background-color: var(--space-black); }
+        
+        #sky { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, #111a24 0%, #050508 100%); z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+
+        #world-container { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; transition: transform 3s cubic-bezier(0.4, 0, 1, 1), opacity 2s; z-index: 1; pointer-events: none; }
+        #top-filler { flex: 1.5; background: transparent; }
+        .grass { flex: 1.5; background: linear-gradient(to bottom, #5aa351 0%, #4a8a42 100%); position: relative; border-top: 8px solid #3d7337; }
+
+        .cute-animals {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 100px; 
+            display: flex; align-items: center; gap: 20px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
+            animation: float-animals 4s infinite ease-in-out;
+            z-index: 5;
+        }
+        .heart-between { font-size: 60px; animation: heartbeat 1.5s infinite; }
+
+        #final-animals {
+            position: fixed; bottom: 30px; right: 30px; font-size: 60px;
+            display: none; align-items: center; gap: 10px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+            z-index: 100; opacity: 0;
+            transition: opacity 2s ease-in;
+            animation: float-final 4s infinite ease-in-out;
+        }
+
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10; }
+        #title { color: white; text-shadow: 4px 4px 0px #000; padding: 20px; background: rgba(0,0,0,0.6); border: 4px solid #fff; cursor: pointer; pointer-events: auto; font-size: 24px; }
+
+        .chatbox { 
+            background: linear-gradient(135deg, rgba(16, 19, 41, 0.95) 0%, rgba(32, 10, 56, 0.95) 100%); 
+            border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 25px rgba(138, 43, 226, 0.8);
+            padding: 40px; color: white; max-width: 600px; width: 90%; 
+            display: none; text-align: center; border-radius: 15px; pointer-events: auto;
+        }
+
+        #dialogue, #reactionText { font-size: 24px; line-height: 1.6; margin: 20px 0; }
+        #question-title, #reaction-title { font-size: 18px !important; }
+
+        button { 
+            background: #100f1c; color: white; border: 1px solid #8a2be2; padding: 20px; margin-top: 20px; font-family: 'Press+Start+2P'; 
+            cursor: pointer; width: 100%; border-radius: 8px; transition: 0.3s; font-size: 18px;
+        }
+        button:hover { background: #8a2be2; box-shadow: 0 0 20px var(--glow-blue), inset 0 0 10px white; transform: scale(1.02); }
+
+        #final-scene { display: none; position: relative; text-align: center; color: white; z-index: 20; pointer-events: auto; }
+        .cake { font-size: 200px; position: relative; z-index: 25; animation: float 3s infinite ease-in-out; filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3)); }
+        
+        .orbiting-icon { position: absolute; font-size: 55px; top: 50%; left: 50%; margin-top: -27px; margin-left: -27px; animation: orbitUniform 12s linear infinite; }
+        
+        .quest-planet-container { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 100; cursor: pointer; }
+        .quest-planet { font-size: 120px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.5)); animation: pulse-planet 1.5s infinite; }
+        
+        .click-me-hint {
+            font-size: 14px; color: #fff; text-transform: uppercase; margin-bottom: 10px;
+            text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+            animation: blink-gold 1s infinite alternate;
+        }
+
+        .confetti { position: absolute; width: 10px; height: 10px; animation: fall linear forwards; }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+        @keyframes float-final { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        
+        @keyframes orbitUniform { 
+            from { transform: rotate(var(--start-angle)) translateX(380px) rotate(calc(-1 * var(--start-angle))); } 
+            to { transform: rotate(calc(var(--start-angle) + 360deg)) translateX(380px) rotate(calc(-1 * (var(--start-angle) + 360deg))); } 
+        }
+        
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        @keyframes float-animals { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -15px); } }
+        @keyframes pulse-planet { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes blink-gold { from { opacity: 0.6; transform: scale(0.9); } to { opacity: 1; transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <audio id="birthdayMusic" loop>
+        <source src="bday.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="sky"></div>
+
+    <div id="world-container">
+        <div id="top-filler"></div>
+        <div class="grass" id="ground">
+            <div class="cute-animals">
+                <span>🐣</span>
+                <span class="heart-between">💖</span>
+                <span>🐻‍❄️</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-animals">
+        <span>🐣</span>
+        <span style="font-size: 30px;">💖</span>
+        <span>🐻‍❄️</span>
+    </div>
+
+    <div id="ui-layer">
+        <h1 id="title" onclick="playMusicAndStart()">Hi my joshyboo</h1>
+        
+        <div class="chatbox" id="chatbox">
+            <span id="question-title" style="color:var(--neon-cyan); display:block; margin-bottom:12px;"></span>
+            <p id="dialogue"></p>
+            <div id="options"></div>
+        </div>
+
+        <div id="reactionBox" class="chatbox">
+            <span id="reaction-title" style="color:var(--neon-cyan); display:block; margin-bottom:12px;"></span>
+            <p id="reactionText"></p>
+        </div>
+
+        <div id="final-scene">
+            <div class="cake">🎂</div>
+            <h2 id="final-text" style="margin-top:80px; line-height:1.6; font-size: 44px;">Happy Birthday, <br><span style="color:#ff69b4;">my precious joshyboo</span> ✨💖</h2>
+        </div>
+    </div>
+
+    <script>
+        function playMusicAndStart() {
+            const audio = document.getElementById('birthdayMusic');
+            audio.play().catch(e => console.log("Lỗi phát nhạc:", e));
+            startIntro();
+        }
+
+        const questions = [
+            { title: "Question 1/3", text: "What special day are we celebrating today?", options: [{ label: "me dunno", correct: false, reaction: "✋🏻🛑thinkkk..." }, { label: "me bday", correct: true, reaction: "😍yehhh! 🎉" }] },
+            { title: "Question 2/3", text: "What sweet thing makes ur birthday even better?", options: [{ label: "chocolate!", correct: false, reaction: "⛔️ nuh huh, chu poao 😤" }, { label: "da chi", correct: true, reaction: "🌻ofc issa me! quack quack!🐥" }] },
+            { title: "Question 3/3", text: "Who is the most special birthday person in the universe?", options: [{ label: "eh who?", correct: false, reaction: "🚩 are chu sure?? 🤔" }, { label: "me da joshyboo", correct: true, reaction: "🧸 yessu that's chu! 🧸👑" }] }
+        ];
+
+        const sky = document.getElementById('sky');
+        const ground = document.getElementById('ground');
+        
+        function createStars(count, container) {
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                const sz = Math.random() * 3 + 2 + 'px';
+                s.style.width = s.style.height = sz;
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(s);
+            }
+        }
+        createStars(250, sky);
+
+        function plantFlowers() {
+            for (let i = 0; i < 70; i++) {
+                const f = document.createElement('div');
+                f.style.position = 'absolute'; 
+                f.innerHTML = '🌼'; 
+                f.style.left = Math.random() * 100 + '%'; 
+                f.style.top = Math.random() * 100 + '%';
+                f.style.fontSize = (Math.random() * 10 + 15) + 'px';
+                f.style.zIndex = '1';
+                ground.appendChild(f);
+            }
+        }
+        plantFlowers();
+
+        function startIntro() {
+            document.getElementById('title').style.display = 'none';
+            const cb = document.getElementById('chatbox');
+            cb.style.display = 'block';
+            document.getElementById('question-title').textContent = 'da chi';
+            document.getElementById('dialogue').textContent = 'da chi has a small quiz for you, be prepared!!';
+
+            setTimeout(() => {
+                cb.style.display = 'none';
+                const rb = document.getElementById('reactionBox');
+                document.getElementById('reaction-title').textContent = 'you';
+                rb.style.display = 'block';
+                document.getElementById('reactionText').textContent = 'oh nyooo 😳';
+                setTimeout(() => {
+                    rb.style.display = 'none';
+                    cb.style.display = 'block';
+                    document.getElementById('question-title').textContent = 'da chi';
+                    document.getElementById('dialogue').textContent = 'lessu go my warrior josh woshyboo 💪';
+                    setTimeout(() => { cb.style.display = 'none'; showQuestion(0); }, 2000);
+                }, 1500);
+            }, 2000);
+        }
+
+        function showQuestion(idx) {
+            const q = questions[idx];
+            const cb = document.getElementById('chatbox');
+            cb.style.display = 'block';
+            document.getElementById('question-title').textContent = q.title;
+            document.getElementById('dialogue').textContent = q.text;
+            const optCont = document.getElementById('options');
+            optCont.innerHTML = '';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt.label;
+                btn.onclick = () => {
+                    cb.style.display = 'none';
+                    const rb = document.getElementById('reactionBox');
+                    document.getElementById('reaction-title').textContent = 'da chi';
+                    rb.style.display = 'block';
+                    document.getElementById('reactionText').textContent = opt.reaction;
+                    setTimeout(() => {
+                        rb.style.display = 'none';
+                        if(opt.correct) {
+                            if(idx < 2) spawnQuestPlanet(idx); else triggerEnd();
+                        } else { cb.style.display = 'block'; }
+                    }, 1500);
+                };
+                optCont.appendChild(btn);
+            });
+        }
+
+        function spawnQuestPlanet(idx) {
+            const icons = ['🌠', '🌍', '☄️'];
+            const container = document.createElement('div');
+            container.className = 'quest-planet-container';
+            const hint = document.createElement('div');
+            hint.className = 'click-me-hint';
+            hint.textContent = 'click me';
+            const p = document.createElement('div');
+            p.className = 'quest-planet';
+            p.textContent = icons[idx];
+            container.appendChild(hint);
+            container.appendChild(p);
+            document.body.appendChild(container);
+            container.onclick = () => { container.remove(); showQuestion(idx + 1); };
+        }
+
+        function triggerEnd() {
+            // KHÔNG di chuyển mặt đất ở đây nữa để giữ Joshyboo trên cỏ khi đọc lời nhắn
+            const rb = document.getElementById('reactionBox');
+            document.getElementById('reaction-title').textContent = 'da chi';
+            rb.style.display = 'block';
+            document.getElementById('reactionText').textContent = "do chu know something? 🤔";
+            
+            setTimeout(() => {
+                document.getElementById('reactionText').textContent = "da chi loves you big, bigger than the universe. 💖";
+                
+                setTimeout(() => {
+                    // DI CHUYỂN MẶT ĐẤT Ở ĐÂY: Sau khi lời nhắn hiện xong
+                    document.getElementById('world-container').style.transform = 'translateY(120%) rotate(10deg)';
+                    
+                    rb.style.transition = 'all 2s';
+                    rb.style.opacity = '0';
+                    setTimeout(() => {
+                        rb.style.display = 'none';
+                        startFinalCelebration();
+                    }, 2000);
+                }, 3000); // Lời nhắn hiển thị trong 3 giây rồi mới rơi đất
+            }, 2500); // Câu hỏi đầu hiển thị trong 2.5 giây
+        }
+
+        function startFinalCelebration() {
+            document.getElementById('final-scene').style.display = 'block';
+            const finalAni = document.getElementById('final-animals');
+            finalAni.style.display = 'flex';
+            setTimeout(() => { finalAni.style.opacity = '1'; }, 100);
+            const spaceIcons = ['🪐', '🌍', '🌙', '⭐', '🚀', '🌌', '☄️', '🌑', '💫'];
+            spaceIcons.forEach((icon, i) => {
+                const p = document.createElement('div');
+                p.className = 'orbiting-icon'; 
+                p.textContent = icon;
+                const startAngle = i * 40;
+                p.style.setProperty('--start-angle', startAngle + 'deg');
+                document.getElementById('final-scene').appendChild(p);
+            });
+            createStars(30, document.getElementById('final-scene'));
+            setInterval(() => {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff', '#ffffff'];
+                c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px';
+                c.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 5000);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
