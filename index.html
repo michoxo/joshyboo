@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { --space-black: #050508; --galaxy-purple: #200a38; --neon-cyan: #5de0e0; --glow-blue: rgba(93, 224, 224, 0.5); }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Press+Start+2P', cursive; background-color: var(--space-black); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Press Start 2P', cursive; background-color: var(--space-black); }
         
         #sky { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, #111a24 0%, #050508 100%); z-index: 0; }
         .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
@@ -25,7 +25,6 @@
         }
         .heart-between { font-size: 60px; animation: heartbeat 1.5s infinite; }
 
-        
         #final-animals {
             position: fixed; bottom: 30px; right: 30px; font-size: 60px;
             display: none; align-items: center; gap: 10px;
@@ -49,7 +48,7 @@
         #question-title, #reaction-title { font-size: 18px !important; }
 
         button { 
-            background: #100f1c; color: white; border: 1px solid #8a2be2; padding: 20px; margin-top: 20px; font-family: 'Press+Start+2P'; 
+            background: #100f1c; color: white; border: 1px solid #8a2be2; padding: 20px; margin-top: 20px; font-family: 'Press Start 2P'; 
             cursor: pointer; width: 100%; border-radius: 8px; transition: 0.3s; font-size: 18px;
         }
         button:hover { background: #8a2be2; box-shadow: 0 0 20px var(--glow-blue), inset 0 0 10px white; transform: scale(1.02); }
@@ -178,24 +177,41 @@
         function startIntro() {
             document.getElementById('title').style.display = 'none';
             const cb = document.getElementById('chatbox');
+            const rb = document.getElementById('reactionBox');
+            const optCont = document.getElementById('options');
+
+            // Chat box 1: Increased to ~7.4s
             cb.style.display = 'block';
             document.getElementById('question-title').textContent = 'da chi says';
             document.getElementById('dialogue').textContent = 'da chi has important questions for you, be prepared!!🫵🚨';
 
             setTimeout(() => {
                 cb.style.display = 'none';
-                const rb = document.getElementById('reactionBox');
+                // Chat box 2: Increased to ~5s
                 document.getElementById('reaction-title').textContent = 'you';
                 rb.style.display = 'block';
                 document.getElementById('reactionText').textContent = 'oh nyooo 😱 scarehh';
+
                 setTimeout(() => {
                     rb.style.display = 'none';
+                    // Chat box 3: Manual click needed to continue
                     cb.style.display = 'block';
                     document.getElementById('question-title').textContent = 'da chi says';
-                    document.getElementById('dialogue').textContent = 'no turning back now! lessu go my mighty warrior josh woshyboo 💪🤺⚔️';
-                    setTimeout(() => { cb.style.display = 'none'; showQuestion(0); }, 3500);
-                }, 3000);
-            }, 5400);
+                    document.getElementById('dialogue').textContent = 'no turning back now! lessu go my mighty warrior josh woshyboo 💪🤺';
+                    
+                    // Add the "fightttt!!!" button
+                    optCont.innerHTML = '';
+                    const fightBtn = document.createElement('button');
+                    fightBtn.textContent = '⚔️fightttt!!!';
+                    fightBtn.onclick = () => {
+                        optCont.innerHTML = ''; // Clear the button
+                        cb.style.display = 'none';
+                        showQuestion(0); // Start the quiz
+                    };
+                    optCont.appendChild(fightBtn);
+
+                }, 5000); 
+            }, 7000); 
         }
 
         function showQuestion(idx) {
@@ -243,9 +259,8 @@
         }
 
         function triggerEnd() {
-            // KHÔNG di chuyển mặt đất ở đây nữa để giữ Joshyboo trên cỏ khi đọc lời nhắn
             const rb = document.getElementById('reactionBox');
-            document.getElementById('reaction-title').textContent = 'da chi';
+            document.getElementById('reaction-title').textContent = 'da chi says';
             rb.style.display = 'block';
             document.getElementById('reactionText').textContent = "do chu know something? 🤔";
             
@@ -253,17 +268,15 @@
                 document.getElementById('reactionText').textContent = "da chi loves you big, bigger than the universe. 💖";
                 
                 setTimeout(() => {
-                    // DI CHUYỂN MẶT ĐẤT Ở ĐÂY: Sau khi lời nhắn hiện xong
                     document.getElementById('world-container').style.transform = 'translateY(120%) rotate(10deg)';
-                    
                     rb.style.transition = 'all 2s';
                     rb.style.opacity = '0';
                     setTimeout(() => {
                         rb.style.display = 'none';
                         startFinalCelebration();
                     }, 2000);
-                }, 3000); // Lời nhắn hiển thị trong 3 giây rồi mới rơi đất
-            }, 2500); // Câu hỏi đầu hiển thị trong 2.5 giây
+                }, 3000);
+            }, 2500);
         }
 
         function startFinalCelebration() {
