@@ -56,29 +56,49 @@
         #final-scene { display: none; position: relative; text-align: center; color: white; z-index: 20; pointer-events: auto; }
         .cake { font-size: 200px; position: relative; z-index: 25; animation: float 3s infinite ease-in-out; filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3)); }
         
-        .orbiting-icon { position: absolute; font-size: 55px; top: 50%; left: 50%; margin-top: -27px; margin-left: -27px; animation: orbitUniform 12s linear infinite; }
+        .orbiting-icon { 
+            position: absolute; font-size: 55px; top: 50%; left: 50%; 
+            margin-top: -27px; margin-left: -27px; 
+            transform: rotate(var(--start-angle)) translateX(380px) rotate(calc(-1 * var(--start-angle)));
+            transition: top 4s ease-in-out, left 4s ease-in-out, transform 5s cubic-bezier(0.4, 0, 0.2, 1), opacity 2s ease; 
+            z-index: 30; opacity: 0;
+        }
         
-        .quest-planet-container { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 100; cursor: pointer; }
-        .quest-planet { font-size: 120px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.5)); animation: pulse-planet 1.5s infinite; }
+        .spinning {
+            animation: orbitUniform 15s linear infinite !important; 
+            opacity: 1 !important;
+        }
+        
+        .quest-planet-container { 
+            position: absolute; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 100; 
+            cursor: pointer; 
+            transition: top 4s cubic-bezier(0.4, 0, 0.2, 1), left 4s cubic-bezier(0.4, 0, 0.2, 1), transform 5s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform: translate(-50%, -50%);
+        }
+        .quest-planet { font-size: 120px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.5)); animation: pulse-planet 1.5s infinite; transition: all 3s ease-in-out; }
         
         .click-me-hint {
             font-size: 14px; color: #fff; text-transform: uppercase; margin-bottom: 10px;
             text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
             animation: blink-gold 1s infinite alternate;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .confetti { position: absolute; width: 10px; height: 10px; animation: fall linear forwards; }
 
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
-        @keyframes float-final { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-        
         @keyframes orbitUniform { 
             from { transform: rotate(var(--start-angle)) translateX(380px) rotate(calc(-1 * var(--start-angle))); } 
             to { transform: rotate(calc(var(--start-angle) + 360deg)) translateX(380px) rotate(calc(-1 * (var(--start-angle) + 360deg))); } 
         }
-        
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
         @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
         @keyframes float-animals { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -15px); } }
         @keyframes pulse-planet { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -122,6 +142,7 @@
         <div id="reactionBox" class="chatbox">
             <span id="reaction-title" style="color:var(--neon-cyan); display:block; margin-bottom:12px;"></span>
             <p id="reactionText"></p>
+            <div id="reactionOptions"></div>
         </div>
 
         <div id="final-scene">
@@ -140,7 +161,7 @@
         const questions = [
             { title: "Question 1/3", text: "What special day are we celebrating today?", options: [{ label: "me dunno", correct: false, reaction: "✋🏻🛑thinkkk..." }, { label: "me bday", correct: true, reaction: "😍yehhh! 🎉" }] },
             { title: "Question 2/3", text: "What sweet thing makes ur birthday even better?", options: [{ label: "chocolate!", correct: false, reaction: "⛔️ nuh huh, chu poao 😤" }, { label: "da chi", correct: true, reaction: "🌻ofc issa me! quack quack!🐥" }] },
-            { title: "Question 3/3", text: "Who is the most special birthday person in the universe?", options: [{ label: "eh who?", correct: false, reaction: "🚩 are chu sure?? " }, { label: "me da joshyboo", correct: true, reaction: "🧸 yessu that's chu! 🧸👑" }] }
+            { title: "Question 3/3", text: "Who is the most special birthday person in the universe?", options: [{ label: "eh who?", correct: false, reaction: "🚩 are chu sure?? 🤔" }, { label: "me da joshyboo", correct: true, reaction: "🧸 yessu that's chu! 🧸👑" }] }
         ];
 
         const sky = document.getElementById('sky');
@@ -161,12 +182,25 @@
         createStars(250, sky);
 
         function plantFlowers() {
-            for (let i = 0; i < 70; i++) {
+            const flowerCount = 20; 
+            const plantedPositions = [];
+            for (let i = 0; i < flowerCount; i++) {
                 const f = document.createElement('div');
                 f.style.position = 'absolute'; 
                 f.innerHTML = '🌼'; 
-                f.style.left = Math.random() * 100 + '%'; 
-                f.style.top = Math.random() * 100 + '%';
+                let left, top, tooClose, attempts = 0;
+                do {
+                    tooClose = false;
+                    left = (Math.random() * 90) + 5; 
+                    top = (Math.random() * 90) + 5;
+                    attempts++;
+                    for (const pos of plantedPositions) {
+                        const dist = Math.sqrt(Math.pow(pos.l - left, 2) + Math.pow(pos.t - top, 2));
+                        if (dist < 12) { tooClose = true; break; }
+                    }
+                } while (tooClose && attempts < 20);
+                plantedPositions.push({ l: left, t: top });
+                f.style.left = left + '%'; f.style.top = top + '%';
                 f.style.fontSize = (Math.random() * 10 + 15) + 'px';
                 f.style.zIndex = '1';
                 ground.appendChild(f);
@@ -177,34 +211,38 @@
         function startIntro() {
             document.getElementById('title').style.display = 'none';
             const cb = document.getElementById('chatbox');
+            const rb = document.getElementById('reactionBox');
+            const optCont = document.getElementById('options');
+
             cb.style.display = 'block';
-            document.getElementById('question-title').textContent = 'da chi says:';
-            document.getElementById('dialogue').textContent = 'da chi has important questions for you, be prepared!!';
+            document.getElementById('question-title').textContent = 'da chi';
+            document.getElementById('dialogue').textContent = '📢da chi has importantly serious questions for you, be prepared!!';
 
             setTimeout(() => {
                 cb.style.display = 'none';
-                const rb = document.getElementById('reactionBox');
                 document.getElementById('reaction-title').textContent = 'you';
                 rb.style.display = 'block';
-                document.getElementById('reactionText').textContent = 'oh nyooo 😱';
+                document.getElementById('reactionText').textContent = 'wadahelly 😱 oh nyooo';
+                
                 setTimeout(() => {
                     rb.style.display = 'none';
                     cb.style.display = 'block';
-                    document.getElementById('question-title').textContent = 'da chi says:';
-                    document.getElementById('dialogue').textContent = 'lessu go my warrior josh woshyboo 💪';
-                        optCont.innerHTML = '';
-               optCont.innerHTML = '';
+                    document.getElementById('question-title').textContent = 'da chi';
+                    document.getElementById('dialogue').textContent = 'no turning back now! lessu go my warrior josh woshyboo 💪';
+                    
+                    optCont.innerHTML = '';
                     const fightBtn = document.createElement('button');
-                    fightBtn.textContent = '⚔️fightttt!!!';
+                    fightBtn.textContent = 'am readeh, wacha wacha💪😤⚔️';
                     fightBtn.onclick = () => {
-                        optCont.innerHTML = ''; // Clear the button
+                        optCont.innerHTML = '';
                         cb.style.display = 'none';
-                        showQuestion(0); // Start the quiz
+                        showQuestion(0);
                     };
                     optCont.appendChild(fightBtn);
-                }, 5000); 
-            }, 7000); 
+                }, 3500);
+            }, 4000);
         }
+
         function showQuestion(idx) {
             const q = questions[idx];
             const cb = document.getElementById('chatbox');
@@ -225,7 +263,7 @@
                     setTimeout(() => {
                         rb.style.display = 'none';
                         if(opt.correct) {
-                            if(idx < 2) spawnQuestPlanet(idx); else triggerEnd();
+                            spawnQuestPlanet(idx);
                         } else { cb.style.display = 'block'; }
                     }, 1500);
                 };
@@ -234,9 +272,9 @@
         }
 
         function spawnQuestPlanet(idx) {
-            const icons = ['🌠', '🌍', '☄️'];
+            const icons = ['🌠', '🌍', '☄️', '🌙'];
             const container = document.createElement('div');
-            container.className = 'quest-planet-container';
+            container.className = 'quest-planet-container collected-planet'; 
             const hint = document.createElement('div');
             hint.className = 'click-me-hint';
             hint.textContent = 'click me';
@@ -245,49 +283,122 @@
             p.textContent = icons[idx];
             container.appendChild(hint);
             container.appendChild(p);
+            
+            container.style.left = '50%';
+            container.style.top = '30%';
             document.body.appendChild(container);
-            container.onclick = () => { container.remove(); showQuestion(idx + 1); };
+            
+            container.onclick = () => { 
+                p.style.animation = 'none';
+                hint.style.display = 'none';
+                container.style.pointerEvents = 'none';
+                
+                container.style.top = '15%';
+                container.style.left = (15 + (idx * 23)) + '%';
+                p.style.fontSize = '60px';
+                
+                if (idx < 2) {
+                    showQuestion(idx + 1); 
+                } else if (idx === 2) {
+                    triggerEnd(); 
+                } else if (idx === 3) {
+                    startFinalCelebrationTransition();
+                }
+            };
         }
 
         function triggerEnd() {
-  
             const rb = document.getElementById('reactionBox');
+            const rbOpts = document.getElementById('reactionOptions');
+            rbOpts.innerHTML = ''; 
             document.getElementById('reaction-title').textContent = 'da chi';
             rb.style.display = 'block';
-            document.getElementById('reactionText').textContent = "do chu know something? 🤔";
+            document.getElementById('reactionText').textContent = "🤓☝️do chu know something?";
             
-            setTimeout(() => {
+            const wadaBtn = document.createElement('button');
+            wadaBtn.textContent = 'eh wada? 🤔';
+            wadaBtn.onclick = () => {
+                wadaBtn.remove();
                 document.getElementById('reactionText').textContent = "da chi loves you big, bigger than the universe. 💖";
                 
                 setTimeout(() => {
-               
-                    document.getElementById('world-container').style.transform = 'translateY(120%) rotate(10deg)';
-                    
-                    rb.style.transition = 'all 2s';
-                    rb.style.opacity = '0';
-                    setTimeout(() => {
-                        rb.style.display = 'none';
-                        startFinalCelebration();
-                    }, 2000);
-                }, 3000); // Lời nhắn hiển thị trong 3 giây rồi mới rơi đất
-            }, 2500); // Câu hỏi đầu hiển thị trong 2.5 giây
+                    rb.style.display = 'none';
+                    spawnQuestPlanet(3);
+                }, 3000);
+            };
+            rbOpts.appendChild(wadaBtn);
+        }
+
+        function startFinalCelebrationTransition() {
+            const rb = document.getElementById('reactionBox');
+            document.getElementById('world-container').style.transform = 'translateY(120%) rotate(10deg)';
+            rb.style.transition = 'all 2s';
+            rb.style.opacity = '0';
+            
+            setTimeout(() => {
+                rb.style.display = 'none';
+                startFinalCelebration();
+            }, 2000);
         }
 
         function startFinalCelebration() {
-            document.getElementById('final-scene').style.display = 'block';
+            const finalScene = document.getElementById('final-scene');
+            finalScene.style.display = 'block';
             const finalAni = document.getElementById('final-animals');
             finalAni.style.display = 'flex';
             setTimeout(() => { finalAni.style.opacity = '1'; }, 100);
-            const spaceIcons = ['🪐', '🌍', '🌙', '⭐', '🚀', '🌌', '☄️', '🌑', '💫'];
-            spaceIcons.forEach((icon, i) => {
+
+            const collectedPlanets = document.querySelectorAll('.collected-planet');
+            const standardIcons = ['🪐', '🚀', '🌌', '⭐', '💫']; 
+            const allItems = [];
+            
+            // 1. Prepare collected quest planets to behave exactly like other icons
+            collectedPlanets.forEach(planet => {
+                // Remove special quest container styling/hint
+                planet.querySelector('.click-me-hint').remove(); 
+                planet.querySelector('.quest-planet').style.fontSize = '55px';
+                planet.style.margin = '0'; // reset quest translate
+                allItems.push(planet);
+            });
+
+            // 2. Prepare standard icons at random spots
+            standardIcons.forEach((icon) => {
                 const p = document.createElement('div');
                 p.className = 'orbiting-icon'; 
                 p.textContent = icon;
-                const startAngle = i * 40;
-                p.style.setProperty('--start-angle', startAngle + 'deg');
-                document.getElementById('final-scene').appendChild(p);
+                p.style.top = (Math.random() * 80 + 10) + '%';
+                p.style.left = (Math.random() * 80 + 10) + '%';
+                finalScene.appendChild(p);
+                allItems.push(p);
             });
-            createStars(30, document.getElementById('final-scene'));
+
+            const angleStep = 360 / allItems.length;
+
+            // 3. Glide all icons (including the 4 planets) to their orbital path position
+            setTimeout(() => {
+                allItems.forEach((item, index) => {
+                    item.classList.add('orbiting-icon');
+                    item.style.opacity = '1';
+                    
+                    // Center and set specific angle
+                    item.style.top = '50%';
+                    item.style.left = '50%';
+                    item.style.setProperty('--start-angle', (index * angleStep) + 'deg');
+                    
+                    // Final transform triggers glide to orbit perimeter via the class transition
+                    item.style.transform = `rotate(${index * angleStep}deg) translateX(380px) rotate(-${index * angleStep}deg)`;
+                });
+
+                // 4. Start spinning after formation delay
+                setTimeout(() => {
+                    allItems.forEach(item => {
+                        item.classList.add('spinning');
+                    });
+                }, 5500); 
+
+            }, 1000);
+
+            createStars(30, finalScene);
             setInterval(() => {
                 const c = document.createElement('div');
                 c.className = 'confetti';
